@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Wellness Copilot</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #f8e8ff, #e0f7fa);
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+
+    .container {
+      padding: 40px;
+    }
+
+    h1 {
+      color: #4a4a4a;
+    }
+
+    .subtitle {
+      color: #6b7280;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      margin: 20px auto;
+      width: 320px;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+
+    input, button {
+      width: 90%;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background-color: #a78bfa;
+      color: white;
+      cursor: pointer;
+      border: none;
+    }
+
+    button:hover {
+      background-color: #7c3aed;
+    }
+
+    #output {
+      margin-top: 20px;
+      white-space: pre-line;
+      font-weight: 500;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <h1>Wellness Copilot</h1>
+    <p class="subtitle">AI that balances your workload and your well‑being</p>
+
+    <div class="card">
+      <h3>Daily Check-In</h3>
+
+      <input type="text" id="task" placeholder="What’s your main task today?">
+      <input type="number" id="hours" placeholder="Estimated hours (e.g. 4)">
+      <input type="number" id="mood" placeholder="Mood (1-5)">
+
+      <button onclick="generatePlan()">Generate Plan</button>
+
+      <div id="output"></div>
+    </div>
+  </div>
+
+  <script>
+    function generatePlan() {
+      const task = document.getElementById("task").value;
+      const hours = parseInt(document.getElementById("hours").value);
+      const mood = parseInt(document.getElementById("mood").value);
+
+      let message = "🧠 Wellness Copilot Summary:\n\n";
+
+      // Workload analysis
+      if (hours > 6) {
+        message += "⚠️ High workload detected. Consider splitting this task.\n";
+      } else {
+        message += "✅ Your workload is manageable today.\n";
+      }
+
+      // Mood analysis
+      if (mood <= 2) {
+        message += "💡 Low mood detected. Prioritize lighter tasks and recovery time.\n";
+      } else if (mood == 3) {
+        message += "🟡 Medium energy — maintain balance and take breaks.\n";
+      } else {
+        message += "🟢 Good energy levels — great time for deep focus.\n";
+      }
+
+      // Suggested plan
+      message += "\n📅 Suggested Plan:\n";
+      message += `- Focus session on "${task}"\n`;
+      message += "- Work in 60–90 min blocks\n";
+      message += "- Take intentional breaks\n";
+      message += "- End day with reflection or light task\n";
+
+      document.getElementById("output").innerText = message;
+    }
+  </script>
+
+</body>
+</html>
+``

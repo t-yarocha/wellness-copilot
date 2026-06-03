@@ -1,121 +1,987 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Wellness Copilot</title>
-
   <style>
+    :root {
+      --bg1: #f8e8ff;
+      --bg2: #e0f7fa;
+      --card: rgba(255, 255, 255, 0.78);
+      --text: #2f2a3a;
+      --muted: #6f6a7d;
+      --accent: #a78bfa;
+      --accent-dark: #7c3aed;
+      --success: #7dd3a7;
+      --warning: #f7b267;
+      --danger: #f28b82;
+      --shadow: 0 18px 40px rgba(80, 60, 120, 0.12);
+      --border: rgba(255, 255, 255, 0.4);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #f8e8ff, #e0f7fa);
       margin: 0;
-      padding: 0;
-      text-align: center;
+      font-family: Inter, Arial, sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--bg1), var(--bg2));
+      transition: background 0.6s ease;
+      overflow-x: hidden;
     }
 
-    .container {
-      padding: 40px;
+    .background-glow {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.35), transparent 30%),
+        radial-gradient(circle at 80% 25%, rgba(255,255,255,0.22), transparent 25%),
+        radial-gradient(circle at 50% 80%, rgba(255,255,255,0.18), transparent 30%);
+      filter: blur(10px);
+      z-index: 0;
     }
 
-    h1 {
-      color: #4a4a4a;
+    .app {
+      position: relative;
+      z-index: 1;
+      padding: 24px;
+      max-width: 1300px;
+      margin: 0 auto;
     }
 
-    .subtitle {
-      color: #6b7280;
-      margin-bottom: 20px;
+    .hero {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .hero-left h1 {
+      margin: 0;
+      font-size: 2.3rem;
+      letter-spacing: -0.03em;
+    }
+
+    .hero-left p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 1.02rem;
+      max-width: 640px;
+      line-height: 1.5;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      font-size: 0.94rem;
+      color: var(--muted);
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: 1.25fr 0.95fr;
+      gap: 20px;
+    }
+
+    .column {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
     }
 
     .card {
-      background: white;
+      background: var(--card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
       padding: 20px;
-      margin: 20px auto;
-      width: 320px;
-      border-radius: 15px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      box-shadow: var(--shadow);
     }
 
-    input, button {
-      width: 90%;
-      margin-top: 10px;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
+    .card h2, .card h3 {
+      margin-top: 0;
+      margin-bottom: 8px;
+    }
+
+    .card p.sub {
+      margin-top: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .agent-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .agent-card::after {
+      content: "";
+      position: absolute;
+      right: -40px;
+      top: -40px;
+      width: 170px;
+      height: 170px;
+      background: radial-gradient(circle, rgba(255,255,255,0.7), rgba(255,255,255,0.05));
+      filter: blur(12px);
+      border-radius: 50%;
+    }
+
+    .agent-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .agent-orb {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #ffffff, #d8c6ff 40%, #b8f2e6 75%, rgba(255,255,255,0.2));
+      box-shadow:
+        0 0 24px rgba(167, 139, 250, 0.45),
+        0 0 42px rgba(184, 242, 230, 0.35);
+      position: relative;
+      animation: floaty 4s ease-in-out infinite;
+    }
+
+    .agent-orb::before {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.45);
+    }
+
+    @keyframes floaty {
+      0%, 100% { transform: translateY(0px);}
+      50% { transform: translateY(-6px);}
+    }
+
+    .agent-bubble {
+      background: rgba(255,255,255,0.68);
+      border: 1px solid rgba(255,255,255,0.45);
+      border-radius: 20px;
+      padding: 14px 16px;
+      line-height: 1.55;
+      color: var(--text);
+      font-size: 0.97rem;
+    }
+
+    .agent-questions {
+      margin-top: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .question {
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.52);
+      border: 1px solid rgba(255,255,255,0.35);
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid rgba(90, 70, 120, 0.12);
+      background: rgba(255,255,255,0.85);
+      color: var(--text);
+      border-radius: 16px;
+      padding: 13px 14px;
+      outline: none;
+      font-size: 0.95rem;
+      transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: rgba(167, 139, 250, 0.55);
+      box-shadow: 0 0 0 4px rgba(167,139,250,0.12);
+      transform: translateY(-1px);
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 16px;
     }
 
     button {
-      background-color: #a78bfa;
-      color: white;
-      cursor: pointer;
       border: none;
+      border-radius: 16px;
+      padding: 12px 18px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s ease, background 0.15s ease, opacity 0.15s ease;
     }
 
     button:hover {
-      background-color: #7c3aed;
+      transform: translateY(-1px);
     }
 
-    #output {
-      margin-top: 20px;
+    .primary {
+      background: linear-gradient(135deg, var(--accent), #c084fc);
+      color: white;
+    }
+
+    .secondary {
+      background: rgba(255,255,255,0.78);
+      color: var(--text);
+      border: 1px solid rgba(90, 70, 120, 0.1);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .stat {
+      border-radius: 18px;
+      padding: 16px;
+      background: rgba(255,255,255,0.62);
+      border: 1px solid rgba(255,255,255,0.38);
+    }
+
+    .stat .label {
+      color: var(--muted);
+      font-size: 0.84rem;
+      margin-bottom: 6px;
+    }
+
+    .stat .value {
+      font-size: 1.25rem;
+      font-weight: 800;
+    }
+
+    .plan-output {
+      margin-top: 16px;
+      border-radius: 20px;
+      padding: 16px;
+      background: rgba(255,255,255,0.62);
+      border: 1px solid rgba(255,255,255,0.38);
+      line-height: 1.7;
       white-space: pre-line;
-      font-weight: 500;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.55);
+    }
+
+    .dot {
+      flex-shrink: 0;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-top: 7px;
+      background: var(--accent);
+      box-shadow: 0 0 10px rgba(167,139,250,0.6);
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .onboarding {
+      position: fixed;
+      inset: 0;
+      background: rgba(32, 24, 48, 0.32);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 20;
+    }
+
+    .modal {
+      width: min(680px, 100%);
+      background: rgba(255,255,255,0.84);
+      border: 1px solid rgba(255,255,255,0.45);
+      backdrop-filter: blur(16px);
+      border-radius: 30px;
+      box-shadow: 0 25px 60px rgba(40, 30, 60, 0.18);
+      padding: 26px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .modal::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at top right, rgba(198, 174, 255, 0.32), transparent 28%),
+        radial-gradient(circle at bottom left, rgba(174, 234, 255, 0.28), transparent 28%);
+      pointer-events: none;
+    }
+
+    .step {
+      display: none;
+      position: relative;
+      z-index: 1;
+    }
+
+    .step.active {
+      display: block;
+    }
+
+    .step h2 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 1.8rem;
+    }
+
+    .step p {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .chip {
+      border-radius: 999px;
+      padding: 10px 14px;
+      border: 1px solid rgba(90,70,120,0.12);
+      background: rgba(255,255,255,0.75);
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .chip.selected {
+      background: linear-gradient(135deg, var(--accent), #c084fc);
+      color: white;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .footer-note {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    @media (max-width: 980px) {
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+      .hero {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .form-grid, .stats {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
-
 <body>
+  <div class="background-glow"></div>
 
-  <div class="container">
-    <h1>Wellness Copilot</h1>
-    <p class="subtitle">AI that balances your workload and your well‑being</p>
+  <!-- Onboarding -->
+  <div class="onboarding" id="onboarding">
+    <div class="modal">
+      <div class="step active" id="step1">
+        <h2>Welcome to Wellness Copilot ✨</h2>
+        <p>
+          I’m your cozy AI companion for sustainable productivity. I’ll help you
+          balance deadlines, mood, energy, and routines so your day feels more
+          supportive — not overwhelming.
+        </p>
+        <div class="agent-header" style="margin-top:18px;">
+          <div class="agent-orb"></div>
+          <div class="agent-bubble">
+            Before we begin, I’d love to personalize your space.
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="primary" onclick="nextStep(2)">Begin</button>
+        </div>
+      </div>
 
-    <div class="card">
-      <h3>Daily Check-In</h3>
+      <div class="step" id="step2">
+        <h2>What’s your favorite color?</h2>
+        <p>
+          Pick one, or type your own. I’ll use it to create your personalized dashboard mood.
+        </p>
 
-      <input type="text" id="task" placeholder="What’s your main task today?">
-      <input type="number" id="hours" placeholder="Estimated hours (e.g. 4)">
-      <input type="number" id="mood" placeholder="Mood (1-5)">
+        <div class="chips" id="colorChips">
+          <div class="chip" onclick="selectColorChip(this, 'lavender')">Lavender</div>
+          <div class="chip" onclick="selectColorChip(this, 'pink')">Blush Pink</div>
+          <div class="chip" onclick="selectColorChip(this, 'blue')">Sky Blue</div>
+          <div class="chip" onclick="selectColorChip(this, 'mint')">Mint</div>
+          <div class="chip" onclick="selectColorChip(this, 'peach')">Peach</div>
+          <div class="chip" onclick="selectColorChip(this, 'sage')">Sage</div>
+        </div>
 
-      <button onclick="generatePlan()">Generate Plan</button>
+        <div style="margin-top:16px;">
+          <label for="customColor">Or type a color:</label>
+          <input id="customColor" type="text" placeholder="ex. lilac, teal, rose, warm beige" />
+        </div>
 
-      <div id="output"></div>
+        <div class="btn-row">
+          <button class="secondary" onclick="nextStep(1)">Back</button>
+          <button class="primary" onclick="applyFavoriteColorAndNext()">Continue</button>
+        </div>
+      </div>
+
+      <div class="step" id="step3">
+        <h2>How do you want me to support you today?</h2>
+        <p>Choose the mode that feels closest to what you need right now.</p>
+
+        <div class="chips" id="supportChips">
+          <div class="chip" onclick="selectSupportChip(this, 'gentle')">Gentle support</div>
+          <div class="chip" onclick="selectSupportChip(this, 'focused')">Deep focus</div>
+          <div class="chip" onclick="selectSupportChip(this, 'balanced')">Balanced planning</div>
+          <div class="chip" onclick="selectSupportChip(this, 'recovery')">Recovery mode</div>
+        </div>
+
+        <div class="btn-row">
+          <button class="secondary" onclick="nextStep(2)">Back</button>
+          <button class="primary" onclick="finishOnboarding()">Open Dashboard</button>
+        </div>
+        <div class="footer-note">You can adjust your color and style again later.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="app">
+    <div class="hero">
+      <div class="hero-left">
+        <div class="pill">🫶 Human-centered AI • Personalized wellness workspace</div>
+        <h1>Wellness Copilot</h1>
+        <p>
+          AI that balances your workload and your well-being. Personalized by mood,
+          energy, deadlines, and your favorite aesthetic.
+        </p>
+      </div>
+      <div class="pill" id="welcomePill">🎨 Theme: Lavender • Mode: Balanced planning</div>
+    </div>
+
+    <div class="dashboard">
+      <!-- Left -->
+      <div class="column">
+        <div class="card agent-card">
+          <div class="agent-header">
+            <div class="agent-orb"></div>
+            <div>
+              <h2 style="margin:0;">Your Cozy Agent</h2>
+              <p class="sub" id="agentSubtitle">A calm presence for sustainable productivity</p>
+            </div>
+          </div>
+
+          <div class="agent-bubble" id="agentMessage">
+            Hi — I’m here to help you build a healthier day around your real workload.
+            Tell me what’s on your plate, how you’re feeling, and I’ll suggest a supportive plan.
+          </div>
+
+          <div class="agent-questions">
+            <div class="question">💭 What feels most emotionally heavy today?</div>
+            <div class="question">📌 Which task matters most right now?</div>
+            <div class="question">🌿 What would a healthier workday look like for you today?</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Daily Check-In</h2>
+          <p class="sub">Build your plan through a more immersive, human-centered prompt flow.</p>
+
+          <div class="form-grid">
+            <div>
+              <label for="nameInput">Your name (optional)</label>
+              <input id="nameInput" type="text" placeholder="How should I address you?" />
+            </div>
+
+            <div>
+              <label for="favoriteColorSetting">Favorite color</label>
+              <input id="favoriteColorSetting" type="text" placeholder="lavender, blue, mint..." />
+            </div>
+
+            <div class="full">
+              <label for="mainTask">Main task or deadline</label>
+              <input id="mainTask" type="text" placeholder="ex. Finish RTL validation report" />
+            </div>
+
+            <div>
+              <label for="hoursNeeded">Estimated hours needed</label>
+              <input id="hoursNeeded" type="number" min="0" max="16" placeholder="ex. 6" />
+            </div>
+
+            <div>
+              <label for="deadlineUrgency">Deadline urgency</label>
+              <select id="deadlineUrgency">
+                <option value="">Select urgency</option>
+                <option value="low">Low — not immediate</option>
+                <option value="medium">Medium — sometime soon</option>
+                <option value="high">High — due very soon</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="mood">Mood (1–5)</label>
+              <input id="mood" type="number" min="1" max="5" placeholder="1 = low, 5 = strong" />
+            </div>
+
+            <div>
+              <label for="energy">Energy (1–5)</label>
+              <input id="energy" type="number" min="1" max="5" placeholder="1 = drained, 5 = energized" />
+            </div>
+
+            <div>
+              <label for="stress">Stress (1–5)</label>
+              <input id="stress" type="number" min="1" max="5" placeholder="1 = calm, 5 = overloaded" />
+            </div>
+
+            <div>
+              <label for="availableHours">Available focused hours today</label>
+              <input id="availableHours" type="number" min="0" max="16" placeholder="ex. 4" />
+            </div>
+
+            <div class="full">
+              <label for="personalNote">Anything else affecting your day?</label>
+              <textarea id="personalNote" placeholder="ex. feeling tired, family stress, back-to-back meetings, need a lighter evening..."></textarea>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button class="primary" onclick="generatePlan()">Generate My Wellness Plan</button>
+            <button class="secondary" onclick="applyColorFromSettings()">Apply Favorite Color</button>
+            <button class="secondary" onclick="resetInputs()">Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right -->
+      <div class="column">
+        <div class="card">
+          <h3>Today’s Wellness Snapshot</h3>
+          <p class="sub">A simple dashboard that turns your inputs into supportive signals.</p>
+
+          <div class="stats">
+            <div class="stat">
+              <div class="label">Workload balance</div>
+              <div class="value" id="workloadValue">—</div>
+            </div>
+            <div class="stat">
+              <div class="label">Stress risk</div>
+              <div class="value" id="stressRiskValue">—</div>
+            </div>
+            <div class="stat">
+              <div class="label">Support mode</div>
+              <div class="value" id="supportModeValue">—</div>
+            </div>
+          </div>
+
+          <div class="plan-output" id="planOutput">
+            Your personalized wellness-aware plan will appear here.
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Suggested Day Rhythm</h3>
+          <p class="sub">A gentle structure that adapts based on energy, stress, and urgency.</p>
+          <div class="timeline" id="timeline">
+            <div class="timeline-item">
+              <div class="dot"></div>
+              <div>
+                <strong>Start</strong>
+                <div class="muted">Complete your check-in to generate a personalized rhythm.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Immersive Agent Prompt</h3>
+          <p class="sub">A more conversational experience for your hackathon demo.</p>
+          <div class="agent-bubble" id="immersivePrompt">
+            “Hi. I’m Wellness Copilot. Tell me what you need to carry today, what feels heavy,
+            and what kind of support would help you stay productive without pushing past your limits.”
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
   <script>
-    function generatePlan() {
-      const task = document.getElementById("task").value;
-      const hours = parseInt(document.getElementById("hours").value);
-      const mood = parseInt(document.getElementById("mood").value);
+    let selectedColor = "lavender";
+    let selectedSupport = "balanced";
 
-      let message = "🧠 Wellness Copilot Summary:\n\n";
-
-      // Workload analysis
-      if (hours > 6) {
-        message += "⚠️ High workload detected. Consider splitting this task.\n";
-      } else {
-        message += "✅ Your workload is manageable today.\n";
+    const themeMap = {
+      lavender: {
+        bg1: "#f8e8ff",
+        bg2: "#e0f7fa",
+        accent: "#a78bfa",
+        accentDark: "#7c3aed",
+        title: "Lavender"
+      },
+      pink: {
+        bg1: "#ffe5ef",
+        bg2: "#fff3f7",
+        accent: "#f472b6",
+        accentDark: "#db2777",
+        title: "Blush Pink"
+      },
+      blue: {
+        bg1: "#e0f2fe",
+        bg2: "#eef6ff",
+        accent: "#60a5fa",
+        accentDark: "#2563eb",
+        title: "Sky Blue"
+      },
+      mint: {
+        bg1: "#dcfce7",
+        bg2: "#ecfeff",
+        accent: "#34d399",
+        accentDark: "#059669",
+        title: "Mint"
+      },
+      peach: {
+        bg1: "#ffedd5",
+        bg2: "#fff7ed",
+        accent: "#fb923c",
+        accentDark: "#ea580c",
+        title: "Peach"
+      },
+      sage: {
+        bg1: "#e7f5ec",
+        bg2: "#f4fbf5",
+        accent: "#84cc16",
+        accentDark: "#4d7c0f",
+        title: "Sage"
       }
+    };
 
-      // Mood analysis
-      if (mood <= 2) {
-        message += "💡 Low mood detected. Prioritize lighter tasks and recovery time.\n";
-      } else if (mood == 3) {
-        message += "🟡 Medium energy — maintain balance and take breaks.\n";
-      } else {
-        message += "🟢 Good energy levels — great time for deep focus.\n";
-      }
-
-      // Suggested plan
-      message += "\n📅 Suggested Plan:\n";
-      message += `- Focus session on "${task}"\n`;
-      message += "- Work in 60–90 min blocks\n";
-      message += "- Take intentional breaks\n";
-      message += "- End day with reflection or light task\n";
-
-      document.getElementById("output").innerText = message;
+    function nextStep(stepNumber) {
+      document.querySelectorAll(".step").forEach(step => step.classList.remove("active"));
+      document.getElementById(`step${stepNumber}`).classList.add("active");
     }
-  </script>
 
-</body>
-</html>
-``
+    function selectColorChip(el, color) {
+      document.querySelectorAll("#colorChips .chip").forEach(chip => chip.classList.remove("selected"));
+      el.classList.add("selected");
+      selectedColor = color;
+      document.getElementById("customColor").value = "";
+    }
+
+    function selectSupportChip(el, support) {
+      document.querySelectorAll("#supportChips .chip").forEach(chip => chip.classList.remove("selected"));
+      el.classList.add("selected");
+      selectedSupport = support;
+    }
+
+    function applyTheme(themeKey) {
+      const theme = themeMap[themeKey] || themeMap.lavender;
+      document.documentElement.style.setProperty("--bg1", theme.bg1);
+      document.documentElement.style.setProperty("--bg2", theme.bg2);
+      document.documentElement.style.setProperty("--accent", theme.accent);
+      document.documentElement.style.setProperty("--accent-dark", theme.accentDark);
+
+      const supportTitle = getSupportLabel(selectedSupport);
+      document.getElementById("welcomePill").textContent = `🎨 Theme: ${theme.title} • Mode: ${supportTitle}`;
+    }
+
+    function applyCustomColor(colorNameRaw) {
+      const colorName = (colorNameRaw || "").trim().toLowerCase();
+      if (!colorName) {
+        applyTheme(selectedColor);
+        return;
+      }
+
+      const customGradients = {
+        lilac: ["#f3e8ff", "#e0f2fe", "#c084fc"],
+        teal: ["#ccfbf1", "#ecfeff", "#14b8a6"],
+        rose: ["#ffe4e6", "#fff1f2", "#fb7185"],
+        beige: ["#f5efe6", "#fffaf1", "#c08a5d"],
+        warm beige: ["#f5efe6", "#fffaf1", "#c08a5d"],
+        coral: ["#ffe5d9", "#fff4ed", "#fb7185"],
+        periwinkle: ["#e0e7ff", "#eef2ff", "#818cf8"]
+      };
+
+      if (customGradients[colorName]) {
+        const [bg1, bg2, accent] = customGradients[colorName];
+        document.documentElement.style.setProperty("--bg1", bg1);
+        document.documentElement.style.setProperty("--bg2", bg2);
+        document.documentElement.style.setProperty("--accent", accent);
+        document.getElementById("welcomePill").textContent =
+          `🎨 Theme: ${capitalizeWords(colorName)} • Mode: ${getSupportLabel(selectedSupport)}`;
+        return;
+      }
+
+      // fallback if typed color doesn't match presets
+      document.getElementById("welcomePill").textContent =
+        `🎨 Theme: ${capitalizeWords(colorName)} • Mode: ${getSupportLabel(selectedSupport)}`;
+    }
+
+    function applyFavoriteColorAndNext() {
+      const customColor = document.getElementById("customColor").value.trim();
+      if (customColor) {
+        applyCustomColor(customColor);
+        document.getElementById("favoriteColorSetting").value = customColor;
+      } else {
+        applyTheme(selectedColor);
+        document.getElementById("favoriteColorSetting").value = selectedColor;
+      }
+      nextStep(3);
+    }
+
+    function finishOnboarding() {
+      document.getElementById("onboarding").classList.add("hidden");
+      const supportTitle = getSupportLabel(selectedSupport);
+      document.getElementById("supportModeValue").textContent = supportTitle;
+      updateAgentForSupport();
+    }
+
+    function applyColorFromSettings() {
+      const val = document.getElementById("favoriteColorSetting").value.trim().toLowerCase();
+      if (!val) {
+        applyTheme(selectedColor);
+        return;
+      }
+
+      if (themeMap[val]) {
+        selectedColor = val;
+        applyTheme(val);
+      } else {
+        applyCustomColor(val);
+      }
+    }
+
+    function resetInputs() {
+      document.getElementById("nameInput").value = "";
+      document.getElementById("mainTask").value = "";
+      document.getElementById("hoursNeeded").value = "";
+      document.getElementById("deadlineUrgency").value = "";
+      document.getElementById("mood").value = "";
+      document.getElementById("energy").value = "";
+      document.getElementById("stress").value = "";
+      document.getElementById("availableHours").value = "";
+      document.getElementById("personalNote").value = "";
+      document.getElementById("planOutput").textContent = "Your personalized wellness-aware plan will appear here.";
+      document.getElementById("workloadValue").textContent = "—";
+      document.getElementById("stressRiskValue").textContent = "—";
+      document.getElementById("timeline").innerHTML = `
+        <div class="timeline-item">
+          <div class="dot"></div>
+          <div>
+            <strong>Start</strong>
+            <div class="muted">Complete your check-in to generate a personalized rhythm.</div>
+          </div>
+        </div>`;
+    }
+
+    function getSupportLabel(mode) {
+      if (mode === "gentle") return "Gentle support";
+      if (mode === "focused") return "Deep focus";
+      if (mode === "recovery") return "Recovery mode";
+      return "Balanced planning";
+    }
+
+    function updateAgentForSupport() {
+      const subtitle = document.getElementById("agentSubtitle");
+      const message = document.getElementById("agentMessage");
+      const immersivePrompt = document.getElementById("immersivePrompt");
+
+      if (selectedSupport === "gentle") {
+        subtitle.textContent = "Soft encouragement and lower-pressure support";
+        message.textContent = "I’ll help you lower overwhelm, lighten the day, and create a plan that feels kinder to follow.";
+        immersivePrompt.textContent = "“Let’s take this gently. Tell me what needs your attention, what feels heavy, and how we can build a softer version of productivity today.”";
+      } else if (selectedSupport === "focused") {
+        subtitle.textContent = "Protecting deep work without neglecting your well-being";
+        message.textContent = "I’ll help you prioritize what matters most, reduce friction, and protect focus while pacing your energy intentionally.";
+        immersivePrompt.textContent = "“Let’s create a focused day with room to breathe. Share your main objective, available energy, and how much pressure you’re carrying.”";
+      } else if (selectedSupport === "recovery") {
+        subtitle.textContent = "Prioritizing restoration, emotional safety, and lighter structure";
+        message.textContent = "I’ll help you reduce overload signals, suggest a gentler rhythm, and preserve your capacity instead of draining it.";
+        immersivePrompt.textContent = "“Today is about recovery-aware productivity. Tell me what truly needs to happen — and what can be softened, postponed, or restructured.”";
+      } else {
+        subtitle.textContent = "A calm presence for sustainable productivity";
+        message.textContent = "Hi — I’m here to help you build a healthier day around your real workload. Tell me what’s on your plate, how you’re feeling, and I’ll suggest a supportive plan.";
+        immersivePrompt.textContent = "“Hi. I’m Wellness Copilot. Tell me what you need to carry today, what feels heavy, and what kind of support would help you stay productive without pushing past your limits.”";
+      }
+    }
+
+    function generatePlan() {
+      const name = document.getElementById("nameInput").value.trim();
+      const task = document.getElementById("mainTask").value.trim();
+      const hoursNeeded = Number(document.getElementById("hoursNeeded").value);
+      const urgency = document.getElementById("deadlineUrgency").value;
+      const mood = Number(document.getElementById("mood").value);
+      const energy = Number(document.getElementById("energy").value);
+      const stress = Number(document.getElementById("stress").value);
+      const availableHours = Number(document.getElementById("availableHours").value);
+      const note = document.getElementById("personalNote").value.trim();
+
+      if (!task || !hoursNeeded || !mood || !energy || !stress || !availableHours || !urgency) {
+        document.getElementById("planOutput").textContent =
+          "Please complete the main fields so I can generate a meaningful plan for you.";
+        return;
+      }
+
+      // Workload status
+      let workloadLabel = "Balanced";
+      if (hoursNeeded > availableHours) workloadLabel = "Overloaded";
+      else if (hoursNeeded === availableHours) workloadLabel = "Full";
+      else workloadLabel = "Manageable";
+
+      // Stress risk
+      let stressScore = 0;
+      if (hoursNeeded > availableHours) stressScore += 2;
+      if (urgency === "high") stressScore += 2;
+      if (urgency === "medium") stressScore += 1;
+      if (mood <= 2) stressScore += 1;
+      if (energy <= 2) stressScore += 2;
+      if (stress >= 4) stressScore += 2;
+      if (stress === 3) stressScore += 1;
+
+      let riskLabel = "Low";
+      if (stressScore >= 6) riskLabel = "High";
+      else if (stressScore >= 3) riskLabel = "Moderate";
+
+      document.getElementById("workloadValue").textContent = workloadLabel;
+      document.getElementById("stressRiskValue").textContent = riskLabel;
+      document.getElementById("supportModeValue").textContent = getSupportLabel(selectedSupport);
+
+      // Generate plan text
+      const greeting = name ? `${name}, here’s your personalized plan:` : "Here’s your personalized plan:";
+      let summary = `${greeting}\n\n`;
+
+      if (workloadLabel === "Overloaded") {
+        summary += `⚠️ Your planned work exceeds your available focused hours.\n`;
+        summary += `I recommend reducing scope, splitting the task, or postponing lower-priority work.\n\n`;
+      } else if (workloadLabel === "Full") {
+        summary += `🟡 Your day is full, so pacing matters.\n`;
+        summary += `A structured rhythm and conscious breaks will help protect your energy.\n\n`;
+      } else {
+        summary += `🟢 Your workload appears manageable today.\n`;
+        summary += `This is a good opportunity to work with intention instead of urgency.\n\n`;
+      }
+
+      if (riskLabel === "High") {
+        summary += `💗 Your current stress pattern suggests high overload risk.\n`;
+        summary += `Today should prioritize protection, realistic expectations, and recovery-aware pacing.\n\n`;
+      } else if (riskLabel === "Moderate") {
+        summary += `🌿 There are some stress signals present.\n`;
+        summary += `A balanced plan with breaks and lighter transitions will help keep the day steady.\n\n`;
+      } else {
+        summary += `✨ Your stress risk looks relatively low right now.\n`;
+        summary += `This is a good day to reinforce healthy work habits and maintain balance.\n\n`;
+      }
+
+      summary += `📌 Main priority: ${task}\n`;
+      summary += `⏳ Estimated effort: ${hoursNeeded} hour(s)\n`;
+      summary += `🫧 Support mode: ${getSupportLabel(selectedSupport)}\n`;
+
+      if (note) {
+        summary += `📝 Personal context noted: ${note}\n`;
+      }
+
+      summary += `\nRecommended approach:\n`;
+
+      const blocks = buildTimeBlocks(hoursNeeded, availableHours, urgency, energy, stress);
+      blocks.forEach(block => {
+        summary += `• ${block}\n`;
+      });
+
+      document.getElementById("planOutput").textContent = summary;
+      renderTimeline(blocks);
+      personalizeAgentResponse(name, workloadLabel, riskLabel, note);
+    }
+
+    function buildTimeBlocks(hoursNeeded, availableHours, urgency, energy, stress) {
+      const blocks = [];
+      const usableFocus = Math.min(hoursNeeded, availableHours);
+
+      if (stress >= 4 || energy <= 2) {
+        blocks.push("Begin with a 10-minute grounding reset before starting work");
+      } else {
+        blocks.push("Start with a gentle warm-up: review priorities and define one clear win");
+      }
+
+      if (urgency === "high") {
+        blocks.push("Protect your first deep-focus block for the highest-urgency work");
+      } else {
+        blocks.push("Begin with the most meaningful task while your attention is freshest");
+      }
+
+      if (usableFocus >= 4) {
+        blocks.push("Split work into two or three focus blocks of 60–90 minutes");
+      } else if (usableFocus >= 2) {
+        blocks.push("Use two focused work sessions with short recovery breaks between them");
+      } else {
+        blocks.push("Work in short, intentional sprints to reduce pressure and sustain momentum");
+      }
+
+      blocks.push("Take a 10–15 minute break after each focus block");
+      blocks.push("Protect a buffer window for context-switching, admin tasks, or emotional reset");
+
+      if (hoursNeeded > availableHours) {
+        blocks.push("Move part of the workload to another day or reduce the task scope");
+      }
+
+      if (selectedSupport === "gentle") {
+        blocks.push("Choose a softer end-of-day task so you can close the day without mental spillover");
+      } else if (selectedSupport === "focused") {
+        blocks.push("Silence nonessential distractions during your main work block");
+      } else if (selectedSupport === "recovery") {
+        blocks.push("End earlier if possible and prioritize decompression over extra output");
+      } else {
